@@ -63,46 +63,30 @@
 </head>
 <body>
 
-    <!-- User ID Form (Only for Safari Users) -->
+    <!-- User ID Form (Only for Safari Users & First-Time Web App Users) -->
     <div id="userForm">
         <h2>Enter Your User ID</h2>
         <input type="text" id="userIdInput" placeholder="Enter User ID" maxlength="24">
         <br>
         <button onclick="startWithUserId()">Continue</button>
-        <button onclick="generateAndStart()">Generate Random ID</button>
     </div>
 
     <!-- Fetch Playtime iframe -->
     <iframe id="fetchFrame" allowfullscreen></iframe>
 
     <script>
-        function generateUserId() {
-            const chars = 'abcdef0123456789';
-            let userId = '';
-            for (let i = 0; i < 24; i++) {
-                userId += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return userId;
-        }
-
         function startWithUserId() {
             let userId = document.getElementById("userIdInput").value.trim();
 
             if (!userId) {
-                alert("Please enter a User ID or generate one.");
+                alert("Please enter a User ID.");
                 return;
             }
 
-            lockInUserId(userId);
+            saveAndLoadUserId(userId);
         }
 
-        function generateAndStart() {
-            let userId = generateUserId();
-            document.getElementById("userIdInput").value = userId; // Show generated ID in input field
-            lockInUserId(userId);
-        }
-
-        function lockInUserId(userId) {
+        function saveAndLoadUserId(userId) {
             const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
 
             if (isStandalone) {
@@ -125,15 +109,15 @@
             let savedUserId = localStorage.getItem("fetchPlayUserId");
 
             if (isStandalone) {
-                if (!savedUserId) {
-                    // First time in standalone mode → Generate and save a new ID
-                    savedUserId = generateUserId();
-                    localStorage.setItem("fetchPlayUserId", savedUserId);
+                if (savedUserId) {
+                    // Use the saved ID without asking
+                    loadIframe(savedUserId);
+                } else {
+                    // Show the input form only once on first launch
+                    document.getElementById("userForm").style.display = "block";
                 }
-                // Always use the saved ID in standalone mode
-                loadIframe(savedUserId);
             } else {
-                // In Safari → Show input form
+                // Always show input form in Safari
                 document.getElementById("userForm").style.display = "block";
             }
         };

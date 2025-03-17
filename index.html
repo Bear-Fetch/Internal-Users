@@ -93,22 +93,27 @@
                 return;
             }
 
-            loadIframe(userId, true);
+            lockInUserId(userId);
         }
 
         function generateAndStart() {
             let userId = generateUserId();
             document.getElementById("userIdInput").value = userId; // Show generated ID in input field
-            loadIframe(userId, true);
+            lockInUserId(userId);
         }
 
-        function loadIframe(userId, shouldSave) {
+        function lockInUserId(userId) {
             const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
 
-            if (isStandalone && shouldSave) {
+            if (isStandalone) {
+                // Store ID permanently in standalone mode
                 localStorage.setItem("fetchPlayUserId", userId);
             }
 
+            loadIframe(userId);
+        }
+
+        function loadIframe(userId) {
             document.getElementById('fetchFrame').src = `https://fetch.playtimeweb.com/play?user_id=${userId}&idfa=&placement=landing_games_button_games_adjoe`;
 
             document.getElementById("userForm").style.display = "none";
@@ -121,12 +126,14 @@
 
             if (isStandalone) {
                 if (!savedUserId) {
-                    // First launch → Generate a unique ID and store it
+                    // First time in standalone mode → Generate and save a new ID
                     savedUserId = generateUserId();
                     localStorage.setItem("fetchPlayUserId", savedUserId);
                 }
-                loadIframe(savedUserId, false);
+                // Always use the saved ID in standalone mode
+                loadIframe(savedUserId);
             } else {
+                // In Safari → Show input form
                 document.getElementById("userForm").style.display = "block";
             }
         };

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Enable Standalone Web App Mode -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Fetch Play">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <title>Fetch Play Wrapper</title>
+
+    <!-- Home Screen Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="icon-152.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="icon-120.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="icon-76.png">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            flex-direction: column;
+        }
+        #userForm {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        input, button {
+            padding: 10px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        input {
+            width: 220px;
+            text-align: center;
+        }
+        button {
+            cursor: pointer;
+            background: #007aff;
+            color: white;
+        }
+        iframe {
+            width: 100vw;
+            height: 100vh;
+            border: none;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- User ID Form -->
+    <div id="userForm">
+        <h2>Enter Your User ID</h2>
+        <input type="text" id="userIdInput" placeholder="Enter User ID" maxlength="24">
+        <br>
+        <button onclick="startWithUserId()">Continue</button>
+        <button onclick="generateAndStart()">Generate Random ID</button>
+    </div>
+
+    <!-- Fetch Playtime iframe -->
+    <iframe id="fetchFrame" allowfullscreen></iframe>
+
+    <script>
+        // Function to generate a random user_id similar to the given example
+        function generateUserId() {
+            const chars = 'abcdef0123456789';
+            let userId = '';
+            for (let i = 0; i < 24; i++) {
+                userId += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return userId;
+        }
+
+        function startWithUserId() {
+            let userId = document.getElementById("userIdInput").value.trim();
+
+            if (!userId) {
+                alert("Please enter a User ID or generate one.");
+                return;
+            }
+
+            loadIframe(userId);
+        }
+
+        function generateAndStart() {
+            let userId = generateUserId();
+            loadIframe(userId);
+        }
+
+        function loadIframe(userId) {
+            // Save user ID for next visit
+            localStorage.setItem("fetchPlayUserId", userId);
+
+            // Set iframe source
+            document.getElementById('fetchFrame').src = `https://fetch.playtimeweb.com/play?user_id=${userId}&idfa=&placement=landing_games_button_games_adjoe`;
+
+            // Hide form & show iframe
+            document.getElementById("userForm").style.display = "none";
+            document.getElementById("fetchFrame").style.display = "block";
+        }
+
+        // Check if there's a saved user ID

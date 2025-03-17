@@ -104,8 +104,13 @@
         }
 
         function loadIframe(userId) {
-            // Save user ID for next visit
-            localStorage.setItem("fetchPlayUserId", userId);
+            // Check if running in standalone mode
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+
+            if (isStandalone) {
+                // Save User ID only in standalone mode (web app)
+                localStorage.setItem("fetchPlayUserId", userId);
+            }
 
             // Set iframe source
             const iframe = document.getElementById('fetchFrame');
@@ -116,12 +121,15 @@
             iframe.style.display = "block";
         }
 
-        // Check if there's a saved user ID and auto-load it
+        // Auto-load stored ID only if in standalone mode
         window.onload = function() {
-            const savedUserId = localStorage.getItem("fetchPlayUserId");
-            if (savedUserId) {
-                document.getElementById("userIdInput").value = savedUserId;
-                loadIframe(savedUserId);
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+
+            if (isStandalone) {
+                const savedUserId = localStorage.getItem("fetchPlayUserId");
+                if (savedUserId) {
+                    loadIframe(savedUserId);
+                }
             }
         };
     </script>

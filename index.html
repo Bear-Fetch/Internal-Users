@@ -99,6 +99,7 @@
 
         function generateAndStart() {
             let userId = generateUserId();
+            document.getElementById("userIdInput").value = userId; // Show generated ID in input field
             loadIframe(userId);
         }
 
@@ -107,11 +108,23 @@
             localStorage.setItem("fetchPlayUserId", userId);
 
             // Set iframe source
-            document.getElementById('fetchFrame').src = `https://fetch.playtimeweb.com/play?user_id=${userId}&idfa=&placement=landing_games_button_games_adjoe`;
+            const iframe = document.getElementById('fetchFrame');
+            iframe.src = `https://fetch.playtimeweb.com/play?user_id=${userId}&idfa=&placement=landing_games_button_games_adjoe`;
 
             // Hide form & show iframe
             document.getElementById("userForm").style.display = "none";
-            document.getElementById("fetchFrame").style.display = "block";
+            iframe.style.display = "block";
         }
 
-        // Check if there's a saved user ID
+        // Check if there's a saved user ID and auto-load it
+        window.onload = function() {
+            const savedUserId = localStorage.getItem("fetchPlayUserId");
+            if (savedUserId) {
+                document.getElementById("userIdInput").value = savedUserId;
+                loadIframe(savedUserId);
+            }
+        };
+    </script>
+
+</body>
+</html>

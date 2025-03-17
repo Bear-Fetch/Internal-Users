@@ -63,7 +63,7 @@
 </head>
 <body>
 
-    <!-- User ID Form -->
+    <!-- User ID Form (Only for Safari Users) -->
     <div id="userForm">
         <h2>Enter Your User ID</h2>
         <input type="text" id="userIdInput" placeholder="Enter User ID" maxlength="24">
@@ -104,14 +104,6 @@
         }
 
         function loadIframe(userId) {
-            // Check if running in standalone mode
-            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
-
-            if (isStandalone) {
-                // Save User ID only in standalone mode (web app)
-                localStorage.setItem("fetchPlayUserId", userId);
-            }
-
             // Set iframe source
             const iframe = document.getElementById('fetchFrame');
             iframe.src = `https://fetch.playtimeweb.com/play?user_id=${userId}&idfa=&placement=landing_games_button_games_adjoe`;
@@ -121,15 +113,20 @@
             iframe.style.display = "block";
         }
 
-        // Auto-load stored ID only if in standalone mode
         window.onload = function() {
             const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+            let savedUserId = localStorage.getItem("fetchPlayUserId");
 
             if (isStandalone) {
-                const savedUserId = localStorage.getItem("fetchPlayUserId");
-                if (savedUserId) {
-                    loadIframe(savedUserId);
+                if (!savedUserId) {
+                    // First launch → Generate and store a permanent User ID
+                    savedUserId = generateUserId();
+                    localStorage.setItem("fetchPlayUserId", savedUserId);
                 }
+                loadIframe(savedUserId);
+            } else {
+                // In Safari → Show input form
+                document.getElementById("userForm").style.display = "block";
             }
         };
     </script>

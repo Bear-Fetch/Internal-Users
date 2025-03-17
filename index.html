@@ -76,7 +76,6 @@
     <iframe id="fetchFrame" allowfullscreen></iframe>
 
     <script>
-        // Function to generate a random user_id similar to the given example
         function generateUserId() {
             const chars = 'abcdef0123456789';
             let userId = '';
@@ -94,23 +93,26 @@
                 return;
             }
 
-            loadIframe(userId);
+            loadIframe(userId, true);
         }
 
         function generateAndStart() {
             let userId = generateUserId();
             document.getElementById("userIdInput").value = userId; // Show generated ID in input field
-            loadIframe(userId);
+            loadIframe(userId, true);
         }
 
-        function loadIframe(userId) {
-            // Set iframe source
-            const iframe = document.getElementById('fetchFrame');
-            iframe.src = `https://fetch.playtimeweb.com/play?user_id=${userId}&idfa=&placement=landing_games_button_games_adjoe`;
+        function loadIframe(userId, shouldSave) {
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
 
-            // Hide form & show iframe
+            if (isStandalone && shouldSave) {
+                localStorage.setItem("fetchPlayUserId", userId);
+            }
+
+            document.getElementById('fetchFrame').src = `https://fetch.playtimeweb.com/play?user_id=${userId}&idfa=&placement=landing_games_button_games_adjoe`;
+
             document.getElementById("userForm").style.display = "none";
-            iframe.style.display = "block";
+            document.getElementById("fetchFrame").style.display = "block";
         }
 
         window.onload = function() {
@@ -119,13 +121,12 @@
 
             if (isStandalone) {
                 if (!savedUserId) {
-                    // First launch → Generate and store a permanent User ID
+                    // First launch → Generate a unique ID and store it
                     savedUserId = generateUserId();
                     localStorage.setItem("fetchPlayUserId", savedUserId);
                 }
-                loadIframe(savedUserId);
+                loadIframe(savedUserId, false);
             } else {
-                // In Safari → Show input form
                 document.getElementById("userForm").style.display = "block";
             }
         };

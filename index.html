@@ -1,127 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- Enable Standalone Web App Mode -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="Fetch Play">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
-    <title>Fetch Play Wrapper</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Fetch Play" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-    <!-- Home Screen Icons -->
-    <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="icon-152.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="icon-120.png">
-    <link rel="apple-touch-icon" sizes="76x76" href="icon-76.png">
+  <title>Fetch Play Wrapper</title>
 
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #000;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            flex-direction: column;
-        }
-        #userForm {
-            text-align: center;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        input, button {
-            padding: 10px;
-            margin: 10px;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        input {
-            width: 220px;
-            text-align: center;
-        }
-        button {
-            cursor: pointer;
-            background: #007aff;
-            color: white;
-        }
-        iframe {
-            width: 100vw;
-            height: 100vh;
-            border: none;
-            display: none;
-        }
-    </style>
+  <!-- Home Screen Icons -->
+  <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png" />
+  <link rel="apple-touch-icon" sizes="152x152" href="icon-152.png" />
+  <link rel="apple-touch-icon" sizes="120x120" href="icon-120.png" />
+  <link rel="apple-touch-icon" sizes="76x76" href="icon-76.png" />
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: #000;
+      color: #fff;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      text-align: center;
+    }
+
+    iframe {
+      width: 100vw;
+      height: 100vh;
+      border: none;
+      display: none;
+    }
+
+    #instructionScreen,
+    #userForm {
+      display: none;
+      padding: 20px;
+    }
+
+    input,
+    button {
+      padding: 10px;
+      margin: 10px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    input {
+      width: 220px;
+      text-align: center;
+    }
+
+    button {
+      background: #007aff;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
+  <!-- Step 1: Instruction Screen (for Safari users) -->
+  <div id="instructionScreen">
+    <h2>📱 Add Fetch Play to your Home Screen</h2>
+    <p>Tap the <strong>Share</strong> icon (<span style="font-size: 20px;">⬆️</span>)</p>
+    <p>Then select <strong>"Add to Home Screen"</strong></p>
+  </div>
 
-    <!-- User ID Form (Only for Safari Users & First-Time Web App Users) -->
-    <div id="userForm">
-        <h2>Enter Your User ID</h2>
-        <input type="text" id="userIdInput" placeholder="Enter User ID" maxlength="24">
-        <br>
-        <button onclick="startWithUserId()">Continue</button>
-    </div>
+  <!-- Step 2: User ID Prompt (web app only) -->
+  <div id="userForm">
+    <h2>Enter Your User ID</h2>
+    <input type="text" id="userIdInput" placeholder="Enter User ID" maxlength="24" />
+    <br />
+    <button onclick="saveAndStart()">Continue</button>
+  </div>
 
-    <!-- Fetch Playtime iframe -->
-    <iframe id="fetchFrame" allowfullscreen></iframe>
+  <!-- Step 3: App iframe -->
+  <iframe id="fetchFrame" allowfullscreen></iframe>
 
-    <script>
-        function startWithUserId() {
-            let userId = document.getElementById("userIdInput").value.trim();
+  <script>
+    const isStandalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      window.navigator.standalone;
 
-            if (!userId) {
-                alert("Please enter a User ID.");
-                return;
-            }
+    function loadIframe(userId) {
+      document.getElementById('fetchFrame').src =
+        `https://fetch.playtimeweb.com/play?user_id=${userId}&idfa=&placement=landing_games_button_games_adjoe`;
 
-            saveAndLoadUserId(userId);
+      document.getElementById('userForm').style.display = 'none';
+      document.getElementById('fetchFrame').style.display = 'block';
+    }
+
+    function saveAndStart() {
+      const userId = document.getElementById('userIdInput').value.trim();
+
+      if (!userId) {
+        alert('Please enter a User ID.');
+        return;
+      }
+
+      localStorage.setItem('fetchPlayUserId', userId);
+      loadIframe(userId);
+    }
+
+    window.onload = function () {
+      if (isStandalone) {
+        const savedUserId = localStorage.getItem('fetchPlayUserId');
+        if (savedUserId) {
+          loadIframe(savedUserId);
+        } else {
+          document.getElementById('userForm').style.display = 'block';
         }
-
-        function saveAndLoadUserId(userId) {
-            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
-
-            if (isStandalone) {
-                // Store ID permanently in standalone mode
-                localStorage.setItem("fetchPlayUserId", userId);
-            }
-
-            loadIframe(userId);
-        }
-
-        function loadIframe(userId) {
-            document.getElementById('fetchFrame').src = `https://fetch.playtimeweb.com/play?user_id=${userId}&idfa=&placement=landing_games_button_games_adjoe`;
-
-            document.getElementById("userForm").style.display = "none";
-            document.getElementById("fetchFrame").style.display = "block";
-        }
-
-        window.onload = function() {
-            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
-            let savedUserId = localStorage.getItem("fetchPlayUserId");
-
-            if (isStandalone) {
-                if (savedUserId) {
-                    // Use the saved ID without asking
-                    loadIframe(savedUserId);
-                } else {
-                    // Show the input form only once on first launch
-                    document.getElementById("userForm").style.display = "block";
-                }
-            } else {
-                // Always show input form in Safari
-                document.getElementById("userForm").style.display = "block";
-            }
-        };
-    </script>
-
+      } else {
+        document.getElementById('instructionScreen').style.display = 'block';
+      }
+    };
+  </script>
 </body>
 </html>
